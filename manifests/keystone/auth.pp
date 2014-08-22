@@ -55,6 +55,7 @@ class neutron::keystone::auth (
   $email              = 'neutron@localhost',
   $tenant             = 'services',
   $configure_endpoint = true,
+  $configure_user     = true,
   $service_type       = 'network',
   $public_protocol    = 'http',
   $public_address     = '127.0.0.1',
@@ -67,7 +68,9 @@ class neutron::keystone::auth (
   $region             = 'RegionOne'
 ) {
 
-  Keystone_user_role["${auth_name}@${tenant}"] ~> Service <| name == 'neutron-server' |>
+  if $configure_user {
+    Keystone_user_role["${auth_name}@${tenant}"] ~> Service <| name == 'neutron-server' |>
+  }
   Keystone_endpoint["${region}/${auth_name}"]  ~> Service <| name == 'neutron-server' |>
 
   if ! $public_port {
@@ -76,16 +79,19 @@ class neutron::keystone::auth (
     $real_public_port = $public_port
   }
 
-  keystone_user { $auth_name:
-    ensure   => present,
-    password => $password,
-    email    => $email,
-    tenant   => $tenant,
+  if $configure_user {
+    keystone_user { $auth_name:
+      ensure   => present,
+      password => $password,
+      email    => $email,
+      tenant   => $tenant,
+    }
+    keystone_user_role { "${auth_name}@${tenant}":
+      ensure  => present,
+      roles   => 'admin',
+    }
   }
-  keystone_user_role { "${auth_name}@${tenant}":
-    ensure  => present,
-    roles   => 'admin',
-  }
+
   keystone_service { $auth_name:
     ensure      => present,
     type        => $service_type,
