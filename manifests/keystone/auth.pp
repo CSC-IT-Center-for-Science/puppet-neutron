@@ -71,7 +71,6 @@ class neutron::keystone::auth (
   if $configure_user {
     Keystone_user_role["${auth_name}@${tenant}"] ~> Service <| name == 'neutron-server' |>
   }
-  Keystone_endpoint["${region}/${auth_name}"]  ~> Service <| name == 'neutron-server' |>
 
   if ! $public_port {
     $real_public_port = $port
@@ -99,6 +98,8 @@ class neutron::keystone::auth (
   }
 
   if $configure_endpoint {
+    Keystone_endpoint["${region}/${auth_name}"]  ~> Service <| name == 'neutron-server' |>
+
     keystone_endpoint { "${region}/${auth_name}":
       ensure       => present,
       public_url   => "${public_protocol}://${public_address}:${real_public_port}/",
