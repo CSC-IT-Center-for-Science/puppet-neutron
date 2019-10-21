@@ -8,7 +8,7 @@ class neutron::params {
     $package_name       = 'openstack-neutron'
     $server_package     = false
     $server_service     = 'neutron-server'
-    $client_package     = 'python-neutronclient'
+    $client_package     = 'python2-neutronclient'
 
     $ml2_server_package = 'openstack-neutron-ml2'
 
